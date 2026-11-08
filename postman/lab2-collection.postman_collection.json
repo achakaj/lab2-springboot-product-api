@@ -1,0 +1,407 @@
+{
+  "info": {
+    "name": "Lab 2 - API REST CRUD Spring Boot",
+    "description": "Lab 2 : API REST CRUD avec Spring Boot. Démarrer l'application (./mvnw spring-boot:run) avant d'exécuter la collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "POST - Créer un produit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: produit créé avec un id\", function () { pm.expect(json.id).to.be.a(\"number\"); pm.expect(json.name).to.eql(\"Ordinateur Portable\"); pm.expect(json.price).to.eql(1200.5); pm.expect(json.quantity).to.eql(10); });",
+              "pm.environment.set(\"productId\", json.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        },
+        "description": "Crée un produit. Attendu : 201 Created. L'id généré est stocké dans {{productId}}.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ordinateur Portable\",\n  \"description\": \"Laptop 15 pouces\",\n  \"price\": 1200.5,\n  \"quantity\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "POST - Produit invalide (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: message de validation sur name\", function () { pm.expect(json.name).to.eql(\"Le nom est obligatoire\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        },
+        "description": "Corps sans nom : 400 avec {\"name\": \"Le nom est obligatoire\"}.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Sans nom\",\n  \"price\": 10,\n  \"quantity\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "GET - Tous les produits",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: tableau contenant le produit créé\", function () { pm.expect(json).to.be.an(\"array\"); pm.expect(json.map(p => p.id)).to.include(parseInt(pm.environment.get(\"productId\"))); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        },
+        "description": "Liste de tous les produits : 200."
+      }
+    },
+    {
+      "name": "GET - Produit par id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: champs du produit\", function () { pm.expect(json.id).to.eql(parseInt(pm.environment.get(\"productId\"))); pm.expect(json).to.include.keys(\"id\", \"name\", \"description\", \"price\", \"quantity\"); pm.expect(json.name).to.eql(\"Ordinateur Portable\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "description": "Récupère le produit créé : 200."
+      }
+    },
+    {
+      "name": "GET - Produit inexistant (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: message d'erreur exact\", function () { pm.expect(json.error).to.eql(\"Produit introuvable avec l'id: 999\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "999"
+          ]
+        },
+        "description": "Id inexistant : 404 avec {\"error\": ...}."
+      }
+    },
+    {
+      "name": "PUT - Modifier le produit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: valeurs mises à jour\", function () { pm.expect(json.id).to.eql(parseInt(pm.environment.get(\"productId\"))); pm.expect(json.name).to.eql(\"Ordinateur Portable Pro\"); pm.expect(json.price).to.eql(1300); pm.expect(json.quantity).to.eql(8); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "description": "Remplace le produit : 200 avec les nouvelles valeurs.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ordinateur Portable Pro\",\n  \"description\": \"Laptop 15 pouces\",\n  \"price\": 1300,\n  \"quantity\": 8\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "GET - Recherche par nom",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: résultats filtrés par nom\", function () { pm.expect(json).to.be.an(\"array\").that.is.not.empty; json.forEach(p => pm.expect(p.name.toLowerCase()).to.include(\"portable\")); });",
+              "pm.test(\"Body: contient le produit modifié\", function () { pm.expect(json.map(p => p.id)).to.include(parseInt(pm.environment.get(\"productId\"))); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/search?name=portable",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "portable"
+            }
+          ]
+        },
+        "description": "Exercice 1 : recherche par nom (contient, insensible à la casse). Placée avant le DELETE pour que le produit existe encore."
+      }
+    },
+    {
+      "name": "DELETE - Supprimer le produit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 204\", function () { pm.response.to.have.status(204); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "pm.test(\"Body: vide\", function () { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "description": "Supprime le produit : 204 No Content, sans corps."
+      }
+    },
+    {
+      "name": "GET - Après suppression (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: message d'erreur avec l'id supprimé\", function () { pm.expect(json.error).to.eql(\"Produit introuvable avec l'id: \" + pm.environment.get(\"productId\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "description": "Le produit supprimé n'existe plus : 404."
+      }
+    },
+    {
+      "name": "POST - Quantité > 1000 (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Content-Type est JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+              "pm.test(\"Temps de réponse < 500 ms\", function () { pm.expect(pm.response.responseTime).to.be.below(500); });",
+              "const json = pm.response.json();",
+              "pm.test(\"Body: message InvalidQuantityException\", function () { pm.expect(json.error).to.eql(\"La quantité ne peut pas dépasser 1000\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        },
+        "description": "Exercice 2 : quantité supérieure à 1000 : 400 avec {\"error\": ...}.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Stock énorme\",\n  \"price\": 5,\n  \"quantity\": 1001\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
